@@ -1,4 +1,5 @@
 # 基于医药知识图谱的智能问答系统
+* 原文参考：https://github.com/YeYzheng/KGQA-Based-On-medicine?tab=readme-ov-file
 * 这是一个基于Python模块REfO实现的知识库问答初级系统. 该问答系统可以解析输入的自然语言问句生成 SPARQL 查询，进一步请求后台基于TDB知识库的Apache Jena Fuseki 服务, 进而得到问题的结果。
 * 提供疾病症状、疾病用药、药品查询等功能。
 * demo演示
@@ -43,7 +44,11 @@ python manage.py runserver
 # 可能遇到的问题
 * 第二次开动Apache Jena Fuseki 服务时，如果启动失败，需要到TDB文件把prefix前缀的文件全部删除掉。
 * 代码运行错误，应该大部分集中在路径错误上，请仔细阅读报错信息。
-
+    * setting.py——>q2s的词典路径
+    * question2sparql.py——>q2s的词典路径
+    * word_tagging.py——>tagger的词典路径
+    * 导入包时，最好将 .SmartWrapper 补全成 SPARQLWrapper.SmartWrapper
+    
 # 项目不足
 * 只支持一问一答式的对话。
 * 只支持查询知识库有的数据，知识库不包含的数据则查询不到。
