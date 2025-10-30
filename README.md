@@ -48,7 +48,9 @@ python manage.py runserver
     * question2sparql.py——>q2s的词典路径
     * word_tagging.py——>tagger的词典路径
     * 导入包时，最好将 .SmartWrapper 补全成 SPARQLWrapper.SmartWrapper
-    
+    * 重点：配置 urls.py 中的根路径（否则，访问根路径 / 时出现404 Not Found ——> Not Found: /
+[28/Oct/2025 17:08:49] "GET / HTTP/1.1" 404 2069）
+
 # 项目不足
 * 只支持一问一答式的对话。
 * 只支持查询知识库有的数据，知识库不包含的数据则查询不到。
