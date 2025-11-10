@@ -48,8 +48,6 @@ def is_kg_answer_valid(answer: str) -> bool:
 
 
 def search_post(request):
-    chat_history = request.session.get('chat_history', [])
-    
     if request.method == 'POST':
         question = request.POST.get('q', '').strip()
         if question:
@@ -59,21 +57,29 @@ def search_post(request):
             # Step 2: 判断是否有效
             if is_kg_answer_valid(kg_answer):
                 final_answer = kg_answer
-                source = "知识库"  # 👈 新增这行
+                source = "知识库"
             else:
                 # Step 3: 知识库无结果 → 调用大模型
                 final_answer = ask_medical_question(question)
-                source = "AI 助手"  # 👈 新增这行
-            
-            # 保存到历史
+                source = "AI 助手"
+
+            # 保存到历史（限制最多 20 条，避免 session 过大）
+            chat_history = request.session.get('chat_history', [])
             chat_history.append({
                 'user': question,
                 'bot': final_answer,
-                'source': source  # 👈 关键：传给模板
+                'source': source
             })
+            if len(chat_history) > 20:
+                chat_history = chat_history[-20:]  # 只保留最近 20 条
             request.session['chat_history'] = chat_history
-    
-    return render(request, "post.html", {'history': chat_history})
+
+        # ✅ 关键：POST 后重定向，防止刷新重复提交
+        return redirect('home')
+
+    else:  # GET 请求
+        chat_history = request.session.get('chat_history', [])
+        return render(request, "post.html", {'history': chat_history})
 
 def clear_history(request):
     """
