@@ -132,6 +132,15 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+	// 自动滚动到对话底部
+    const dialogFrame = document.querySelector('.ZHZ-dialog-frame');
+    if (dialogFrame) {
+        // 确保 DOM 渲染完成后再滚动（加一点延迟更保险）
+        setTimeout(() => {
+            dialogFrame.scrollTop = dialogFrame.scrollHeight;
+        }, 50);
+    }
+
     const input = document.getElementById('question-input');
     const button = document.getElementById('submit-btn');
 
