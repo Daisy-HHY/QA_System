@@ -51,8 +51,14 @@
 <head>
     <meta charset="UTF-8">
     <title>ZHZ 医药问答系统</title>
+	<!-- 关键：加载定义背景的 CSS -->
+    <link rel="stylesheet" href="/static/css/search-form.css">
+    <!-- 可选：加载 normalize 保证一致性 -->
+    <link rel="stylesheet" href="/static/css/normalize.css">
+    <!-- 加载局部对话样式 -->
+    <link rel="stylesheet" href="/static/css/post-dialog.css">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/post.css' %}">
+    <link rel="stylesheet" href="/static/css/post.css">
 </head>
 <body>
     <div class="container">

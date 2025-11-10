@@ -1,0 +1,38 @@
+/* 容器的内联样式 */
+/* 确保容器可读（半透明白底） */
+.yso-container {
+    position: relative;
+    max-width: 800px;
+    margin: 60px auto;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    font-family: "Microsoft YaHei", sans-serif;
+    color: #333;
+    line-height: 1.6;
+}
+.yso-container h1 {
+    text-align: center;
+    font-size: 28px;
+    color: #007bff;
+    margin-bottom: 15px;
+}
+.yso-chat-history {
+    margin: 25px 0;
+    padding: 15px;
+    background: #fafafa;
+    border-radius: 8px;
+}
+.yso-chat-history p {
+    margin: 8px 0;
+}
+.search {
+    margin-top: 20px;
+}
+.footer {
+    margin-top: 30px;
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+}
