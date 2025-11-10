@@ -1,4 +1,4 @@
-
+<!-- 
 <!DOCTYPE html>
 <html lang="zh" xmlns="http://www.w3.org/1999/html">
 <head>
@@ -13,7 +13,7 @@
 	<!--[if IE]>
 		<script src="http://libs.useso.com/js/html5shiv/3.7/html5shiv.min.js"></script>
 	<![endif]-->
-</head>
+<!-- </head>
 <body>
 	<div class="htmleaf-container">
 		<header class="htmleaf-header">
@@ -43,5 +43,60 @@
 		</div>
         <span style = "font-size:13px;">By YYZ at 2018/03/18</span>
 	</div>
+</body>
+</html> --> -->
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>ZHZ 医药问答系统</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/post.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>ZHZ</h1>
+
+        <div class="intro">
+            Hello，我是ZHZ,是一个集自然语言处理，统计机器学习和知识图谱，有关医药领域的自动问答系统。
+            目前ZHZ只支持疾病症状、疾病用药、药品查询等功能，并且只支持如下形式的提问：
+        </div>
+
+        <div class="examples">
+            <p>某疾病有什么并发症？ （蜘蛛咬伤有什么并发症？）</p>
+            <p>怎么预防某疾病？某疾病有哪些预防措施？ （怎么预防蜘蛛咬伤？蜘蛛咬伤有哪些预防措施？）</p>
+            <p>某疾病的概述是什么？ （蜘蛛咬伤的概述是什么？）</p>
+            <p>怎么治疗某疾病？某疾病的治疗措施是什么？ （蜘蛛咬伤怎么治？）</p>
+            <p>某药品的功效/疗效是什么？/某药品有什么用？ （阿卡波糖片疗效是什么？）</p>
+            <p>某药品的批准文号是什么？ （阿卡波糖片的批准文号是什么？）</p>
+            <p>某症状的概述是什么？/某症状有什么特征？ （肌肉疼痛的概述是什么？）</p>
+            <p>怎么预防某症状？ （怎么预防肌肉疼痛？）</p>
+            <p>某疾病需要什么药治？/应该用什么药治疗某疾病？/有什么药可以治疗某疾病？ （胃窦炎需要什么药治？）</p>
+            <p>某疾病有什么症状/症候/特征？ （喉插管损伤有什么症状？）</p>
+            <p>某症状可能得了什么病？ （我出现喉痒咳嗽，应该得了什么病？）</p>
+        </div>
+
+        <!-- 多轮对话历史 -->
+        <div class="chat-history">
+            {% for msg in history %}
+                <div class="message user-msg">Q: {{ msg.user }}</div>
+                <div class="message bot-msg">A: {{ msg.bot|safe }}</div>
+            {% empty %}
+                <div class="message bot-msg">你好！请按照上方示例输入你的问题。</div>
+            {% endfor %}
+        </div>
+
+        <!-- 提问表单 -->
+        <form method="post" class="search-form">
+            {% csrf_token %}
+            <input type="text" name="q" placeholder="请输入你的问题..." required />
+            <button type="submit">提问</button>
+        </form>
+
+        <div class="footer">
+            By ZYQ HHY ZYS at 2018/03/18
+        </div>
+    </div>
 </body>
 </html>
