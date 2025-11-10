@@ -90,9 +90,11 @@
 			{% for msg in history %}
 				<p><strong>Q:</strong> {{ msg.user }}</p>
 				<p style="margin-left: 20px;"><strong>A:</strong> {{ msg.bot|safe }}</p>
-				{% if not forloop.last %}
-					<hr style="border:0; border-top:1px dashed #ccc; margin:12px 0;">
-				{% endif %}
+				<!-- 👇 在这里添加来源标签 -->
+    			<small class="{% if msg.source == '知识库' %}source-knowledge{% else %}source-ai{% endif %}">
+				（{{ msg.source|default:"知识库" }}）
+				</small>
+    			<br><br>
 			{% endfor %}
 		</div>
 		{% endif %}

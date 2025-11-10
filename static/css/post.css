@@ -62,6 +62,17 @@ h1 {
     margin-left: 1em;
 }
 
+.source-knowledge {
+    color: green;
+    font-weight: bold;
+    margin-left: 6px;
+  }
+  .source-ai {
+    color: blue;
+    font-weight: bold;
+    margin-left: 6px;
+  }
+
 /* 表单样式 */
 .search-form {
     margin-top: 20px;

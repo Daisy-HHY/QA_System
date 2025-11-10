@@ -25,7 +25,7 @@ def query_function(question):
 
                 # TODO 查询结果为空，根据OWA，回答“不知道”
                 if len(value) == 0:
-                    return 'Yso还小，知识库中并没有该问题的答案！！！'
+                    return 'ZHZ还小，知识库中并没有该问题的答案！！！'
                 elif len(value) == 1:
                     print(len(value[0]))
                     if len(value[0]) != 1:
@@ -40,7 +40,7 @@ def query_function(question):
 
             else:
                 # TODO 自然语言问题无法匹配到已有的正则模板上，回答“无法理解”
-                return 'Yso还小，无法理解你的问题！！！'
+                return 'ZHZ还小，无法理解你的问题！！！'
 
             #print('#' * 100)
 
