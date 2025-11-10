@@ -1,4 +1,4 @@
-
+<!-- 
 <!DOCTYPE html>
 <html lang="zh" xmlns="http://www.w3.org/1999/html">
 <head>
@@ -13,7 +13,7 @@
 	<!--[if IE]>
 		<script src="http://libs.useso.com/js/html5shiv/3.7/html5shiv.min.js"></script>
 	<![endif]-->
-</head>
+<!-- </head>
 <body>
 	<div class="htmleaf-container">
 		<header class="htmleaf-header">
@@ -43,5 +43,164 @@
 		</div>
         <span style = "font-size:13px;">By YYZ at 2018/03/18</span>
 	</div>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>ZHZ 医药问答系统</title>
+	<!-- 关键：加载定义背景的 CSS -->
+    <link rel="stylesheet" href="/static/css/search-form.css">
+    <!-- 可选：加载 normalize 保证一致性 -->
+    <link rel="stylesheet" href="/static/css/normalize.css">
+    <!-- 加载局部对话样式 -->
+    <link rel="stylesheet" href="/static/css/post-dialog.css">
+    {% load static %}
+    <link rel="stylesheet" href="/static/css/post.css">
+    <link rel="stylesheet" href="/static/css/confirmModal.css">
+</head>
+<body>
+    <div class="container">
+        <h1>ZHZ</h1>
+
+        <div class="intro">
+            Hello，我是ZHZ,是一个集自然语言处理，统计机器学习和知识图谱，有关医药领域的自动问答系统。
+            目前ZHZ只支持疾病症状、疾病用药、药品查询等功能，并且只支持如下形式的提问：
+        </div>
+
+        <div class="examples">
+            <p>某疾病有什么并发症？ （蜘蛛咬伤有什么并发症？）</p>
+            <p>怎么预防某疾病？某疾病有哪些预防措施？ （怎么预防蜘蛛咬伤？蜘蛛咬伤有哪些预防措施？）</p>
+            <p>某疾病的概述是什么？ （蜘蛛咬伤的概述是什么？）</p>
+            <p>怎么治疗某疾病？某疾病的治疗措施是什么？ （蜘蛛咬伤怎么治？）</p>
+            <p>某药品的功效/疗效是什么？/某药品有什么用？ （阿卡波糖片疗效是什么？）</p>
+            <p>某药品的批准文号是什么？ （阿卡波糖片的批准文号是什么？）</p>
+            <p>某症状的概述是什么？/某症状有什么特征？ （肌肉疼痛的概述是什么？）</p>
+            <p>怎么预防某症状？ （怎么预防肌肉疼痛？）</p>
+            <p>某疾病需要什么药治？/应该用什么药治疗某疾病？/有什么药可以治疗某疾病？ （胃窦炎需要什么药治？）</p>
+            <p>某疾病有什么症状/症候/特征？ （喉插管损伤有什么症状？）</p>
+            <p>某症状可能得了什么病？ （我出现喉痒咳嗽，应该得了什么病？）</p>
+        </div>
+
+		<!-- 👇 把清空按钮放在这里（表单下方） -->
+		<span id="clearBtn" style="
+			color: #e74c3c;
+			font-size: 18px;
+			cursor: pointer;
+			margin-top: 10px;
+			display: inline-block;
+			user-select: none;
+		">🗑️ 清空对话历史</span>
+
+		<br><br>
+
+        <!-- 多轮对话历史 -->
+        <!-- ✅ 新增：对话历史区域（放在 examples 下方） -->
+		{% if history %}
+		<div class="ZHZ-dialog-frame">
+			{% for msg in history %}
+				<p><strong>Q:</strong> {{ msg.user }}</p>
+				<p style="margin-left: 20px;"><strong>A:</strong> {{ msg.bot|safe }}</p>
+				<!-- 👇 在这里添加来源标签 -->
+    			<small class="{% if msg.source == '知识库' %}source-knowledge{% else %}source-ai{% endif %}">
+				（{{ msg.source|default:"知识库" }}）
+				</small>
+    			<br><br>
+			{% endfor %}
+		</div>
+		{% endif %}
+
+        <!-- 替换原来的 <form class="search"> -->
+		<div class="ZHZ-input-group">
+			<form method="post" id="question-form">
+				{% csrf_token %}
+				<div class="ZHZ-input-wrapper">
+					<input 
+						type="text" 
+						name="q" 
+						id="question-input"
+						placeholder="请输入你的问题（例如：蜘蛛咬伤有什么并发症？）" 
+						required 
+						autocomplete="off"
+					/>
+					<button 
+						type="submit" 
+						id="submit-btn"
+						aria-label="提交问题"
+						disabled
+					>
+						<!-- 向上箭头 SVG -->
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+    						<path d="M12 19V5M12 5L7 10M12 5L17 10" />
+						</svg>
+					</button>
+				</div>
+			</form>
+		</div>
+
+		<!-- 自定义确认弹窗 -->
+		<div id="confirmModal">
+			<div class="modal-content">
+				<p>确定要清空所有对话记录吗？</p>
+				<button id="confirmYes">确定清空</button>
+				<button id="confirmNo">取消</button>
+			</div>
+		</div>
+
+        <div class="footer">
+            By ZYQ HHY ZYS at 2025/11/10
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+	// 自动滚动到对话底部
+    const dialogFrame = document.querySelector('.ZHZ-dialog-frame');
+    if (dialogFrame) {
+        // 确保 DOM 渲染完成后再滚动（加一点延迟更保险）
+        setTimeout(() => {
+            dialogFrame.scrollTop = dialogFrame.scrollHeight;
+        }, 50);
+    }
+
+    const input = document.getElementById('question-input');
+    const button = document.getElementById('submit-btn');
+
+    // 初始状态已由 HTML 设置为 disabled
+
+    // 监听输入变化
+    input.addEventListener('input', function () {
+        const value = input.value.trim();
+        if (value) {
+            button.disabled = false;
+        } else {
+            button.disabled = true;
+        }
+    });
+
+    // 自动滚动到底部（如果存在对话）
+    const dialogContent = document.getElementById('dialog-content');
+    if (dialogContent) {
+        dialogContent.scrollTop = dialogContent.scrollHeight;
+    }
+});
+</script>
+<!-- 添加 JavaScript 控制逻辑 -->
+<script>
+document.getElementById('clearBtn').addEventListener('click', function() {
+    document.getElementById('confirmModal').style.display = 'flex';
+});
+
+document.getElementById('confirmNo').addEventListener('click', function() {
+    document.getElementById('confirmModal').style.display = 'none';
+});
+
+document.getElementById('confirmYes').addEventListener('click', function() {
+    // 跳转到 /clear/ 路由（Django 已配置）
+    window.location.href = "{% url 'clear_history' %}";
+});
+</script>
 </body>
 </html>

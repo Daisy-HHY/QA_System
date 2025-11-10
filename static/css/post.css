@@ -1,0 +1,110 @@
+/* post.css - 专用于 post.html 的样式 */
+body {
+    font-family: "Microsoft YaHei", sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #007bff;
+}
+
+.intro {
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 10px 0 15px;
+}
+
+.examples {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.examples p {
+    margin: 4px 0;
+}
+
+/* 对话区域 */
+.chat-history {
+    margin: 20px 0;
+    min-height: 200px;
+    padding: 15px;
+    background: #fafafa;
+    border-radius: 6px;
+}
+
+.message {
+    margin-bottom: 12px;
+    padding: 8px 0;
+}
+
+.user-msg {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.bot-msg {
+    color: #333;
+    margin-left: 1em;
+}
+
+.source-knowledge {
+    color: green;
+    font-weight: bold;
+    margin-left: 6px;
+  }
+.source-ai {
+    color: blue;
+    font-weight: bold;
+    margin-left: 6px;
+}
+
+/* 表单样式 */
+.search-form {
+    margin-top: 20px;
+}
+
+.search-form input[type="text"] {
+    width: 60%;
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+}
+
+.search-form button {
+    padding: 8px 16px;
+    margin-left: 10px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.search-form button:hover {
+    background: #0056b3;
+}
+
+.footer {
+    margin-top: 30px;
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+}
