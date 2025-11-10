@@ -44,7 +44,7 @@
         <span style = "font-size:13px;">By YYZ at 2018/03/18</span>
 	</div>
 </body>
-</html> --> -->
+</html> -->
 
 <!DOCTYPE html>
 <html lang="zh">
@@ -84,25 +84,75 @@
         </div>
 
         <!-- 多轮对话历史 -->
-        <div class="chat-history">
-            {% for msg in history %}
-                <div class="message user-msg">Q: {{ msg.user }}</div>
-                <div class="message bot-msg">A: {{ msg.bot|safe }}</div>
-            {% empty %}
-                <div class="message bot-msg">你好！请按照上方示例输入你的问题。</div>
-            {% endfor %}
-        </div>
+        <!-- ✅ 新增：对话历史区域（放在 examples 下方） -->
+		{% if history %}
+		<div class="ZHZ-dialog-frame">
+			{% for msg in history %}
+				<p><strong>Q:</strong> {{ msg.user }}</p>
+				<p style="margin-left: 20px;"><strong>A:</strong> {{ msg.bot|safe }}</p>
+				{% if not forloop.last %}
+					<hr style="border:0; border-top:1px dashed #ccc; margin:12px 0;">
+				{% endif %}
+			{% endfor %}
+		</div>
+		{% endif %}
 
-        <!-- 提问表单 -->
-        <form method="post" class="search-form">
-            {% csrf_token %}
-            <input type="text" name="q" placeholder="请输入你的问题..." required />
-            <button type="submit">提问</button>
-        </form>
+        <!-- 替换原来的 <form class="search"> -->
+		<div class="ZHZ-input-group">
+			<form method="post" id="question-form">
+				{% csrf_token %}
+				<div class="ZHZ-input-wrapper">
+					<input 
+						type="text" 
+						name="q" 
+						id="question-input"
+						placeholder="请输入你的问题（例如：蜘蛛咬伤有什么并发症？）" 
+						required 
+						autocomplete="off"
+					/>
+					<button 
+						type="submit" 
+						id="submit-btn"
+						aria-label="提交问题"
+						disabled
+					>
+						<!-- 向上箭头 SVG -->
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+    						<path d="M12 19V5M12 5L7 10M12 5L17 10" />
+						</svg>
+					</button>
+				</div>
+			</form>
+		</div>
 
         <div class="footer">
             By ZYQ HHY ZYS at 2018/03/18
         </div>
     </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('question-input');
+    const button = document.getElementById('submit-btn');
+
+    // 初始状态已由 HTML 设置为 disabled
+
+    // 监听输入变化
+    input.addEventListener('input', function () {
+        const value = input.value.trim();
+        if (value) {
+            button.disabled = false;
+        } else {
+            button.disabled = true;
+        }
+    });
+
+    // 自动滚动到底部（如果存在对话）
+    const dialogContent = document.getElementById('dialog-content');
+    if (dialogContent) {
+        dialogContent.scrollTop = dialogContent.scrollHeight;
+    }
+});
+</script>
 </body>
 </html>

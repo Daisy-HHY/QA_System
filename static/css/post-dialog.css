@@ -18,7 +18,7 @@
     color: #007bff;
     margin-bottom: 15px;
 }
-.yso-chat-history {
+/* .yso-chat-history {
     margin: 25px 0;
     padding: 15px;
     background: #fafafa;
@@ -26,9 +26,124 @@
 }
 .yso-chat-history p {
     margin: 8px 0;
+} */
+/* post-dialog.css - 对话区域的“浮层”样式 */
+.ZHZ-dialog-frame {
+    margin: 20px 0 25px;
+    padding: 18px;
+    background: #ffffff; /* 纯白底，与背景图形成对比 */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* 关键：制造“浮起”感 */
+    border: 1px solid #eee;
+    line-height: 1.6;
+
+    /* 👇 关键：限制高度并启用滚动 */
+    max-height: 300px;          /* 可根据需要调整 */
+    overflow-y: auto;           /* 超出时显示垂直滚动条 */
+    overflow-x: hidden;         /* 防止水平滚动 */
+}
+/* 滚动条美化（可选，提升体验） */
+.yso-dialog-frame::-webkit-scrollbar {
+    width: 8px;
+}
+.yso-dialog-frame::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+.yso-dialog-frame::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+.yso-dialog-frame::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* 兼容 Firefox 等 */
+.yso-dialog-frame {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+.ZHZ-dialog-frame p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.ZHZ-dialog-frame hr {
+    margin: 12px 0;
 }
 .search {
     margin-top: 20px;
+}
+/* ========== 表单美化 ========== */
+
+.ZHZ-input-group {
+    margin: 20px 0 30px;
+    text-align: center;
+}
+
+.ZHZ-input-wrapper {
+    display: flex;
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+}
+
+.ZHZ-input-wrapper input {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: #333;
+    background: transparent;
+}
+
+.ZHZ-input-wrapper input::placeholder {
+    color: #aaa;
+}
+
+/* 按钮基础样式 */
+.ZHZ-input-wrapper button {
+    padding: 0 20px;
+    background: #6c757d; /* 灰色（禁用态） */
+    color: white;
+    border: none;
+    outline: none;
+    cursor: not-allowed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+/* 有输入时的可用状态 */
+.ZHZ-input-wrapper button:not(:disabled) {
+    background: #007bff !important;
+    cursor: pointer !important;
+}
+
+.ZHZ-input-wrapper button:not(:disabled):hover {
+    background: #0069d9 !important;
+}
+
+/* SVG 图标颜色继承文字色 */
+.ZHZ-input-wrapper button svg {
+    color: currentColor;
+}
+
+/* 响应式：小屏时按钮变高 */
+@media (max-width: 600px) {
+    .ZHZ-input-wrapper {
+        flex-direction: column;
+    }
+    .ZHZ-input-wrapper button {
+        padding: 14px;
+        width: 100%;
+    }
 }
 .footer {
     margin-top: 30px;
