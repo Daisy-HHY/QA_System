@@ -28,4 +28,5 @@ urlpatterns = [
     # url(r'^kgqa-demo$', views.search_post),
     path('', views.search_post, name='home'),  # 访问根路径时跳转到首页
     re_path(r'^kgqa-demo$', views.search_post, name='kgqa_demo'),
+    path('clear/', views.clear_history, name='clear_history'),  # 👈 新增这行
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

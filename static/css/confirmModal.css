@@ -1,0 +1,62 @@
+/* 清空历史按钮 */
+#clearBtn {
+    color: #e74c3c;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 10px;
+    display: inline-block;
+    user-select: none;
+}
+
+/* 自定义确认弹窗遮罩层 */
+#confirmModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 弹窗内容框 */
+#confirmModal .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    max-width: 300px;
+}
+
+/* 弹窗按钮通用样式 */
+#confirmModal button {
+    border: none;
+    padding: 6px 12px;
+    margin: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+    font-size: 14px;
+}
+
+/* 确定按钮 - 红色 */
+#confirmYes {
+    background: #e74c3c;
+}
+
+/* 取消按钮 - 灰色 */
+#confirmNo {
+    background: #95a5a6;
+}
+
+/* 按钮悬停效果（可选） */
+#confirmYes:hover {
+    background: #c0392b;
+}
+#confirmNo:hover {
+    background: #7f8c8d;
+}

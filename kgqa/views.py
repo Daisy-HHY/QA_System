@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 import sys
 from kgqa.KB_query import query_main
 from django.http import JsonResponse
@@ -74,3 +74,11 @@ def search_post(request):
             request.session['chat_history'] = chat_history
     
     return render(request, "post.html", {'history': chat_history})
+
+def clear_history(request):
+    """
+    清空 session 中的聊天历史
+    """
+    if 'chat_history' in request.session:
+        del request.session['chat_history']
+    return redirect('home')  # 重定向回问答页面

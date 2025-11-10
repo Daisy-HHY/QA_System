@@ -59,6 +59,7 @@
     <link rel="stylesheet" href="/static/css/post-dialog.css">
     {% load static %}
     <link rel="stylesheet" href="/static/css/post.css">
+    <link rel="stylesheet" href="/static/css/confirmModal.css">
 </head>
 <body>
     <div class="container">
@@ -82,6 +83,18 @@
             <p>某疾病有什么症状/症候/特征？ （喉插管损伤有什么症状？）</p>
             <p>某症状可能得了什么病？ （我出现喉痒咳嗽，应该得了什么病？）</p>
         </div>
+
+		<!-- 👇 把清空按钮放在这里（表单下方） -->
+		<span id="clearBtn" style="
+			color: #e74c3c;
+			font-size: 18px;
+			cursor: pointer;
+			margin-top: 10px;
+			display: inline-block;
+			user-select: none;
+		">🗑️ 清空对话历史</span>
+
+		<br><br>
 
         <!-- 多轮对话历史 -->
         <!-- ✅ 新增：对话历史区域（放在 examples 下方） -->
@@ -127,8 +140,17 @@
 			</form>
 		</div>
 
+		<!-- 自定义确认弹窗 -->
+		<div id="confirmModal">
+			<div class="modal-content">
+				<p>确定要清空所有对话记录吗？</p>
+				<button id="confirmYes">确定清空</button>
+				<button id="confirmNo">取消</button>
+			</div>
+		</div>
+
         <div class="footer">
-            By ZYQ HHY ZYS at 2018/03/18
+            By ZYQ HHY ZYS at 2025/11/10
         </div>
     </div>
 
@@ -163,6 +185,21 @@ document.addEventListener('DOMContentLoaded', function () {
     if (dialogContent) {
         dialogContent.scrollTop = dialogContent.scrollHeight;
     }
+});
+</script>
+<!-- 添加 JavaScript 控制逻辑 -->
+<script>
+document.getElementById('clearBtn').addEventListener('click', function() {
+    document.getElementById('confirmModal').style.display = 'flex';
+});
+
+document.getElementById('confirmNo').addEventListener('click', function() {
+    document.getElementById('confirmModal').style.display = 'none';
+});
+
+document.getElementById('confirmYes').addEventListener('click', function() {
+    // 跳转到 /clear/ 路由（Django 已配置）
+    window.location.href = "{% url 'clear_history' %}";
 });
 </script>
 </body>
