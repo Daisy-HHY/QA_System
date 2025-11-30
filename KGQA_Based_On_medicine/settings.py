@@ -131,6 +131,20 @@ STATICFILES_DIRS  =(
 )
 
 STATIC_URL = '/static/'
+
+# ======================
+# Cache and Session Settings (for robustness testing)
+# ======================
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',  # 可选，本地内存缓存可省略
+    }
+}
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+
 from kgqa.KB_query import jena_sparql_endpoint
 from kgqa.KB_query import question2sparql
 # TODO 连接Fuseki服务器。
