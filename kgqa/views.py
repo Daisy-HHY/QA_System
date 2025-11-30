@@ -54,7 +54,11 @@ def search_post(request):
             kg_answer = query_main.query_function(question)
             
             # Step 2: 判断是否有效
-            if is_kg_answer_valid(kg_answer):
+            if kg_answer is None:
+                # ✅ 新增：Fuseki 宕机 → 强制走 LLM
+                final_answer = ask_medical_question(question)
+                source = "AI 助手 (知识库服务不可用)"
+            elif is_kg_answer_valid(kg_answer):
                 final_answer = kg_answer
                 source = "知识库"
             else:

@@ -12,14 +12,13 @@ from KGQA_Based_On_medicine.settings import fuseki,q2s
 
 def query_function(question):
 
-
-        while True:
-            question = question
-            #print(question.encode('utf-8'))
-            #isinstance(question.encode('utf-8'))
-            my_query = q2s.get_sparql(question.encode('utf-8'))
-            #print(my_query)
-            if my_query is not None:
+        question = question
+        #print(question.encode('utf-8'))
+        #isinstance(question.encode('utf-8'))
+        my_query = q2s.get_sparql(question.encode('utf-8'))
+        #print(my_query)
+        if my_query is not None:
+            try:
                 result = fuseki.get_sparql_result(my_query)
                 value = fuseki.get_sparql_result_value(result)
 
@@ -37,12 +36,16 @@ def query_function(question):
                     for v in value:
                         output += v + u'、'
                     return output
+            # ===================
+            except Exception as e:
+                # Fuseki 宕机或网络错误 → 返回特殊标记
+                print(f"Fuseki 查询失败: {e}")
+                return None  # ← 关键：返回 None 表示“知识库不可用”
+        else:
+            # TODO 自然语言问题无法匹配到已有的正则模板上，回答“无法理解”
+            return 'ZHZ还小，无法理解你的问题！！！'
 
-            else:
-                # TODO 自然语言问题无法匹配到已有的正则模板上，回答“无法理解”
-                return 'ZHZ还小，无法理解你的问题！！！'
-
-            #print('#' * 100)
+        #print('#' * 100)
 
 if __name__ == '__main__':
     while True:

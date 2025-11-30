@@ -27,7 +27,8 @@ def ask_medical_question(user_query: str) -> str:
             model="qwen-turbo",  # 使用便宜且快的模型
             prompt=prompt,
             temperature=0.3,     # 控制随机性
-            max_tokens=500       # 限制输出长度
+            max_tokens=500,       # 限制输出长度
+            timeout=10  # ← 新增：10秒超时
         )
 
         if response.status_code == 200:
