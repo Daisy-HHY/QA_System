@@ -46,7 +46,6 @@ def is_kg_answer_valid(answer: str) -> bool:
     ]
     return not any(phrase in answer for phrase in invalid_phrases)
 
-
 def search_post(request):
     if request.method == 'POST':
         question = request.POST.get('q', '').strip()
