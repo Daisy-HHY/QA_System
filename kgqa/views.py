@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 import sys
 from kgqa.KB_query import query_main
 from django.http import JsonResponse
-from .utils.llm import ask_medical_question
+from .utils.llm import ask_medical_question, ask_medical_question_with_history
 
 # Create your views here.
 
@@ -49,33 +49,65 @@ def is_kg_answer_valid(answer: str) -> bool:
 def search_post(request):
     if request.method == 'POST':
         question = request.POST.get('q', '').strip()
-        if question:
-            # Step 1: 查询知识图谱
-            kg_answer = query_main.query_function(question)
+        if not question:
+            return redirect('home')
+        
+        # 获取当前会话历史
+        chat_history = request.session.get('chat_history', [])
+        
+        # === Step 1: 尝试带上下文的知识库查询 ===
+        kg_answer = query_main.query_with_context(question, chat_history)
+        
+        if kg_answer is not None and is_kg_answer_valid(kg_answer):
+            final_answer = kg_answer
+            source = "知识库（上下文增强）"
+        else:
+            # === Step 2: 知识库失败 → 调用带历史的 LLM ===
+            try:
+                final_answer = ask_medical_question_with_history(question, chat_history)
+                source = "AI 助手（多轮理解）"
+            except Exception as e:
+                # 兜底：调用原始 LLM（无历史）
+                final_answer = ask_medical_question(question)
+                source = "AI 助手（基础）"
+        
+        # 更新会话历史（保留最近20轮）
+        chat_history.append({
+            'user': question,
+            'bot': final_answer,
+            'source': source
+        })
+        if len(chat_history) > 20:
+            chat_history = chat_history[-20:]
+        request.session['chat_history'] = chat_history
+        request.session.modified = True
+        # if question:
+        #     # Step 1: 查询知识图谱
+        #     kg_answer = query_main.query_function(question)
             
-            # Step 2: 判断是否有效
-            if kg_answer is None:
-                # ✅ 新增：Fuseki 宕机 → 强制走 LLM
-                final_answer = ask_medical_question(question)
-                source = "AI 助手 (知识库服务不可用)"
-            elif is_kg_answer_valid(kg_answer):
-                final_answer = kg_answer
-                source = "知识库"
-            else:
-                # Step 3: 知识库无结果 → 调用大模型
-                final_answer = ask_medical_question(question)
-                source = "AI 助手"
+        #     # Step 2: 判断是否有效
+        #     if kg_answer is None:
+        #         # ✅ 新增：Fuseki 宕机 → 强制走 LLM
+        #         final_answer = ask_medical_question(question)
+        #         source = "AI 助手 (知识库服务不可用)"
+        #     elif is_kg_answer_valid(kg_answer):
+        #         final_answer = kg_answer
+        #         source = "知识库"
+        #     else:
+        #         # Step 3: 知识库无结果 → 调用大模型
+        #         final_answer = ask_medical_question(question)
+        #         source = "AI 助手"
 
-            # 保存到历史（限制最多 20 条，避免 session 过大）
-            chat_history = request.session.get('chat_history', [])
-            chat_history.append({
-                'user': question,
-                'bot': final_answer,
-                'source': source
-            })
-            if len(chat_history) > 20:
-                chat_history = chat_history[-20:]  # 只保留最近 20 条
-            request.session['chat_history'] = chat_history
+        #     # 保存到历史（限制最多 20 条，避免 session 过大）
+        #     chat_history = request.session.get('chat_history', [])
+        #     chat_history.append({
+        #         'user': question,
+        #         'bot': final_answer,
+        #         'source': source
+        #     })
+        #     if len(chat_history) > 20:
+        #         chat_history = chat_history[-20:]  # 只保留最近 20 条
+        #     request.session['chat_history'] = chat_history
 
         # ✅ 关键：POST 后重定向，防止刷新重复提交
         return redirect('home')
