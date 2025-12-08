@@ -13,14 +13,17 @@ from KGQA_Based_On_medicine.settings import fuseki,q2s
 # === 加载疾病和药品词典（用于实体提取）===
 _DISEASE_SET = set()
 _DRUG_SET = set()
+_SYMPTOM_SET = set()
 
 def _load_entity_set():
-    global _DISEASE_SET, _DRUG_SET
+    global _DISEASE_SET, _DRUG_SET, _SYMPTOM_SET
     try:
-        with open(r"E:\QA_System\KGQA-Based-On-medicine-master\kgqa\KB_query\jibing_pos_name.txt", "r", encoding="utf-8") as f:
+        with open(r"E:\QA_System\KGQA-Based-On-medicine-master\kgqa\KB_query\dict\jibing_pos_name.txt", "r", encoding="utf-8") as f:
             _DISEASE_SET = set(line.strip() for line in f if line.strip())
-        with open(r"E:\QA_System\KGQA-Based-On-medicine-master\kgqa\KB_query\drug_pos_name.txt", "r", encoding="utf-8") as f:
+        with open(r"E:\QA_System\KGQA-Based-On-medicine-master\kgqa\KB_query\dict\drug_pos_name.txt", "r", encoding="utf-8") as f:
             _DRUG_SET = set(line.strip() for line in f if line.strip())
+        with open(r"E:\QA_System\KGQA-Based-On-medicine-master\kgqa\KB_query\dict\symptom_pos.txt", "r", encoding="utf-8") as f:
+            _SYMPTOM_SET = set(line.strip() for line in f if line.strip())
     except Exception as e:
         print(f"加载实体词典失败: {e}")
 
@@ -28,12 +31,20 @@ def _load_entity_set():
 _load_entity_set()
 
 def contains_medical_entity(text: str) -> bool:
-    """判断文本是否包含已知疾病或药品"""
-    return any(entity in text for entity in _DISEASE_SET | _DRUG_SET)
+    """判断文本是否包含已知疾病或药品或症状"""
+    return any(entity in text for entity in _DISEASE_SET | _DRUG_SET | _SYMPTOM_SET)
 
 def extract_last_mentioned_entity(history, entity_type="disease"):
     """从对话历史中提取最近提到的疾病或药品"""
-    target_set = _DISEASE_SET if entity_type == "disease" else _DRUG_SET
+    if entity_type == "disease":
+        target_set = _DISEASE_SET
+    elif entity_type == "drug":
+        target_set = _DRUG_SET
+    elif entity_type == "symptom":
+        target_set = _SYMPTOM_SET
+    else:
+        # 防御性编程：防止传入非法类型（如 None, "med", 拼写错误等）
+        raise ValueError(f"Unsupported entity_type: {entity_type}")
     for turn in reversed(history):
         user_text = turn.get('user', '')
         # 精确匹配（避免部分匹配如“胃”匹配“胃炎”）
