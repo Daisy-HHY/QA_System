@@ -64,7 +64,8 @@ def search_post(request):
         else:
             # === Step 2: 知识库失败 → 调用带历史的 LLM ===
             try:
-                final_answer = ask_medical_question_with_history(question, chat_history)
+                llm_q = query_main.resolve_coreference(question, chat_history)
+                final_answer = ask_medical_question_with_history(llm_q, chat_history)
                 source = "AI 助手（多轮理解）"
             except Exception as e:
                 # 兜底：调用原始 LLM（无历史）

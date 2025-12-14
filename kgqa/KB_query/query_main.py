@@ -5,10 +5,12 @@
 """
 import sys
 import os
+import re
 # 从 query_main.py 所在目录向上跳两级，到达项目根目录
 sys.path.append(os.path.abspath("E:/QA_System/KGQA-Based-On-medicine-master"))  # 注意是三级跳转
 
 from KGQA_Based_On_medicine.settings import fuseki,q2s
+from kgqa.KB_query.question_drug_template import pos_disease, pos_drug, pos_symptom
 
 # === 加载疾病和药品词典（用于实体提取）===
 _DISEASE_SET = set()
@@ -34,8 +36,50 @@ def contains_medical_entity(text: str) -> bool:
     """判断文本是否包含已知疾病或药品或症状"""
     return any(entity in text for entity in _DISEASE_SET | _DRUG_SET | _SYMPTOM_SET)
 
+def extract_entities_by_tagger(text: str):
+    words = q2s.tw.get_word_objects(text)
+    diseases = []
+    drugs = []
+    symptoms = []
+    for w in words:
+        if w.pos == pos_disease:
+            diseases.append(w.token.decode('utf-8'))
+        elif w.pos == pos_drug:
+            drugs.append(w.token.decode('utf-8'))
+        elif w.pos == pos_symptom:
+            symptoms.append(w.token.decode('utf-8'))
+    return {'diseases': diseases, 'drugs': drugs, 'symptoms': symptoms}
+
+def get_last_entity(history, prefer_type=None):
+    for turn in reversed(history):
+        user_text = turn.get('user', '')
+        bot_text = turn.get('bot', '')
+        ents = extract_entities_by_tagger(user_text)
+        bot_ents = extract_entities_by_tagger(bot_text)
+        if prefer_type == 'symptom':
+            if ents['symptoms']:
+                return ents['symptoms'][-1], 'symptom'
+            if bot_ents['symptoms']:
+                return bot_ents['symptoms'][-1], 'symptom'
+        if prefer_type == 'drug':
+            if ents['drugs']:
+                return ents['drugs'][-1], 'drug'
+            if bot_ents['drugs']:
+                return bot_ents['drugs'][-1], 'drug'
+        if prefer_type == 'disease':
+            if ents['diseases']:
+                return ents['diseases'][-1], 'disease'
+            if bot_ents['diseases']:
+                return bot_ents['diseases'][-1], 'disease'
+        if ents['diseases']:
+            return ents['diseases'][-1], 'disease'
+        if ents['drugs']:
+            return ents['drugs'][-1], 'drug'
+        if ents['symptoms']:
+            return ents['symptoms'][-1], 'symptom'
+    return None
+
 def extract_last_mentioned_entity(history, entity_type="disease"):
-    """从对话历史中提取最近提到的疾病或药品"""
     if entity_type == "disease":
         target_set = _DISEASE_SET
     elif entity_type == "drug":
@@ -43,14 +87,31 @@ def extract_last_mentioned_entity(history, entity_type="disease"):
     elif entity_type == "symptom":
         target_set = _SYMPTOM_SET
     else:
-        # 防御性编程：防止传入非法类型（如 None, "med", 拼写错误等）
         raise ValueError(f"Unsupported entity_type: {entity_type}")
     for turn in reversed(history):
         user_text = turn.get('user', '')
-        # 精确匹配（避免部分匹配如“胃”匹配“胃炎”）
         for entity in target_set:
             if entity in user_text:
                 return entity
+        if entity_type == "disease":
+            patterns = [
+                r"^(?P<e>[\u4e00-\u9fa5]{2,})(?:.*?)(有什么症状|有哪些症状|症状是什么|并发症|概述|怎么治|如何治疗|治疗措施|需要什么药治|应该用什么药治疗|有什么药可以治疗)",
+                r"(?:怎么预防|如何预防)(?P<e>[\u4e00-\u9fa5]{2,})",
+                r"(?P<e>[\u4e00-\u9fa5]{2,})(?:需要什么药治|应该用什么药治疗|有什么药可以治疗)"
+            ]
+        elif entity_type == "drug":
+            patterns = [
+                r"^(?P<e>[\u4e00-\u9fa5A-Za-z0-9]{2,})(?:的疗效是什么|有什么用|的批准文号是什么)",
+                r"(?P<e>[\u4e00-\u9fa5A-Za-z0-9]{2,})(?:疗效是什么|有什么用)"
+            ]
+        else:
+            patterns = [
+                r"^(?P<e>[\u4e00-\u9fa5]{2,})(?:的概述是什么|有什么特征)"
+            ]
+        for p in patterns:
+            m = re.search(p, user_text)
+            if m:
+                return m.group("e")
     return None
 
 def query_function(question):
@@ -92,42 +153,44 @@ def query_function(question):
 
 # === 新增：上下文感知查询 ===
 def is_pronoun_or_vague_question(question: str) -> bool:
-    vague_words = ["它", "这个", "那个", "上述", "刚才", "怎么治", "怎么办", "有啥", "如何预防", "怎么预防", "能吃", "可以吃"]
+    vague_words = ["它", "这个", "那个", "这", "那", "该病", "该药", "该症状", "这病", "那病", "这药", "那药", "这种症状", "这种情况", "刚才", "上述", "怎么治", "怎么办", "如何预防", "怎么预防", "能吃", "可以吃"]
     return any(w in question for w in vague_words) and not contains_medical_entity(question)
 
 def _run_kb_query(question: str):
     """封装 KB 查询，统一异常处理"""
     return query_function(question)
 
+def resolve_coreference(question: str, history: list) -> str:
+    ents = extract_entities_by_tagger(question)
+    if ents['diseases'] or ents['drugs'] or ents['symptoms']:
+        return question
+    if not is_pronoun_or_vague_question(question):
+        return question
+    prefer_type = None
+    if '症状' in question:
+        prefer_type = 'symptom'
+    elif ('药' in question) or ('治疗' in question):
+        prefer_type = 'disease'
+    last = get_last_entity(history, prefer_type)
+    if not last:
+        return question
+    entity = last[0]
+    if prefer_type == 'symptom' and entity in _DISEASE_SET:
+        return question
+    rewritten = question
+    for pronoun in ["它", "这个", "那个", "这", "那", "该病", "这病", "那病", "该药", "这药", "那药", "该症状", "这种症状", "这种情况"]:
+        rewritten = rewritten.replace(pronoun, entity)
+    return rewritten
+
 def query_with_context(question: str, history: list):
     """
     支持多轮上下文的知识库查询主函数
     返回：有效答案字符串 或 None（表示 KB 无法回答）
     """
-    # Step 1: 尝试原始问题
-    answer = _run_kb_query(question)
-    if answer is not None and 'ZHZ还小' not in answer:
+    rewritten = resolve_coreference(question, history)
+    answer = _run_kb_query(rewritten)
+    if answer is not None and 'ZHZ还小' not in answer and '无法理解' not in answer:
         return answer
-
-    # Step 2: 若问题含代词且无明确实体，尝试重写
-    if is_pronoun_or_vague_question(question):
-        last_disease = extract_last_mentioned_entity(history, "disease")
-        if last_disease:
-            rewritten = question
-            for pronoun in ["它", "这个", "那个"]:
-                rewritten = rewritten.replace(pronoun, last_disease)
-            answer = _run_kb_query(rewritten)
-            if answer is not None and 'ZHZ还小' not in answer:
-                return answer
-
-        last_drug = extract_last_mentioned_entity(history, "drug")
-        if last_drug:
-            rewritten = question
-            for pronoun in ["它", "这个", "那个"]:
-                rewritten = rewritten.replace(pronoun, last_drug)
-            answer = _run_kb_query(rewritten)
-            if answer is not None and 'ZHZ还小' not in answer:
-                return answer
 
     return None  # KB 无法回答
 
@@ -166,4 +229,3 @@ if __name__ == '__main__':
             print('I can\'t understand. :(')
 
         print('#' * 100)
-
